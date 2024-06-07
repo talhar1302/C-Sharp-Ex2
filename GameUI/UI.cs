@@ -18,7 +18,7 @@ namespace GameUI
         // Constant dictionary for card values
         private readonly Dictionary<char, char> CardValues = new Dictionary<char, char>
         {
-            { 'A', '#' }, { 'B', 'B' }, { 'C', 'C' }, { 'D', 'D' }, { 'E', 'E' }, { 'F', 'F' },
+            { 'A', 'A' }, { 'B', 'B' }, { 'C', 'C' }, { 'D', 'D' }, { 'E', 'E' }, { 'F', 'F' },
             { 'G', 'G' }, { 'H', 'H' }, { 'I', 'I' }, { 'J', 'J' }, { 'K', 'K' }, { 'L', 'L' },
             { 'M', 'M' }, { 'N', 'N' }, { 'O', 'O' }, { 'P', 'P' }, { 'Q', 'Q' }, { 'R', 'R' },
             { 'S', 'S' }, { 'T', 'T' }, { 'U', 'U' }, { 'V', 'V' }, { 'W', 'W' }, { 'X', 'X' },
@@ -32,33 +32,57 @@ namespace GameUI
 
         public string GetPlayerName(string prompt)
         {
-            Console.Write(prompt);
-            return Console.ReadLine();
+            string playerName;
+            do
+            {
+                Console.Write(prompt);
+                playerName = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(playerName))
+                {
+                    Console.WriteLine("Player name cannot be empty. Please enter a valid name.");
+                }
+            } while (string.IsNullOrWhiteSpace(playerName));
+            return playerName;
         }
 
         public bool GetYesNoInput(string prompt)
         {
-            Console.Write(prompt);
-            return Console.ReadLine().ToLower() == "yes";
+            string input;
+            do
+            {
+                Console.Write(prompt);
+                input = Console.ReadLine().ToLower();
+                if (input != "yes" && input != "no")
+                {
+                    Console.WriteLine("Invalid input. Please enter 'yes' or 'no'.");
+                }
+            } while (input != "yes" && input != "no");
+
+            return input == "yes";
         }
 
         public (int, int) GetBoardSize()
         {
-            int rows, columns;
-            while (true)
+            int rows = 0, columns = 0;
+            bool validInput = false;
+            while (!validInput)
             {
                 Console.Write("Enter the number of rows (4,5,6): ");
-                rows = int.Parse(Console.ReadLine());
-                Console.Write("Enter the number of columns (4,5,6): ");
-                columns = int.Parse(Console.ReadLine());
-
-                if ((rows >= k_MinBoardSize && rows <= k_MaxBoardSize) && (columns >= k_MinBoardSize && columns <= k_MaxBoardSize) && Board.IsValidBoard(rows, columns))
+                if (int.TryParse(Console.ReadLine(), out rows) && rows >= k_MinBoardSize && rows <= k_MaxBoardSize)
                 {
-                    break;
+                    Console.Write("Enter the number of columns (4,5,6): ");
+                    if (int.TryParse(Console.ReadLine(), out columns) && columns >= k_MinBoardSize && columns <= k_MaxBoardSize && Board.IsValidBoard(rows, columns))
+                    {
+                        validInput = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid column size. Please try again.");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Invalid board size. Please try again.");
+                    Console.WriteLine("Invalid row size. Please try again.");
                 }
             }
             return (rows, columns);
@@ -229,36 +253,40 @@ namespace GameUI
             return move;
         }
 
-        public void DisplayBoardAndCard(Game game, int row, int col, string cardOrder)
+        public void DisplayBoardAndCard(Game game, Player currentPlayer, int row, int col, string cardOrder)
         {
             ClearScreen();
             PrintBoard(game.GetBoard(), revealAll: false);
-            Player currentPlayer = game.GetCurrentPlayer();
             DisplayTurn(currentPlayer);
-            DisplayCard(CardValues[game.GetBoard().GetCards()[row, col].Value], cardOrder);
-            if (game.GetCurrentPlayer().PlayerType != ePlayerType.Human)
-            {
-                System.Threading.Thread.Sleep(2000); // Wait for 2 seconds
-            }
+            DisplayCard(CardValues[game.GetBoard().GetCards()[row, col].Value], cardOrder);        
         }
 
         public void DisplayWinnerOrTie(Game game)
         {
             Player winner = game.DetermineWinner();
-            if (winner != null)
+            if (game.GetGameState() == GameState.Win)
             {
-                DisplayWinner(winner);
+                Console.WriteLine($"The winner is {winner.Name} with {winner.Score} points!");
             }
-            else
+            else if (game.GetGameState() == GameState.Draw)
             {
-                DisplayTie();
+                Console.WriteLine("The game is a draw!");
             }
         }
 
         public bool PromptForNewGame()
         {
-            Console.WriteLine("Would you like to start a new game? (yes/Q to quit): ");
-            string input = Console.ReadLine().ToLower();
+            string input;
+            do
+            {
+                Console.WriteLine("Would you like to start a new game? (yes/Q to quit): ");
+                input = Console.ReadLine().ToLower();
+                if (input != "yes" && input != "q")
+                {
+                    Console.WriteLine("Invalid input. Please enter 'yes' to play again or 'Q' to quit.");
+                }
+            } while (input != "yes" && input != "q");
+
             return input == "yes";
         }
     }

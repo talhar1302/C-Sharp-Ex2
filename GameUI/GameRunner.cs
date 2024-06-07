@@ -15,7 +15,7 @@ namespace GameUI
 
         public void Run()
         {
-            bool playAgain;
+            bool playAgain, IsMatch;
             do
             {
                 ui.ClearScreen();
@@ -36,38 +36,42 @@ namespace GameUI
                 ui.ClearScreen();
                 ui.PrintBoard(game.GetBoard(), revealAll: false);
 
-                while (!game.AllCardsRevealed())
+                while (game.GetGameState() == GameState.Playing)
                 {
                     Player currentPlayer = game.GetCurrentPlayer();
                     ui.DisplayTurn(currentPlayer);
 
                     (int row1, int col1) = ui.GetMove(game, currentPlayer);
-                    game.RevealCard(row1, col1);
-                    ui.DisplayBoardAndCard(game, row1, col1, "First");
+                    game.MakeMove(row1, col1, 1);
+                    ui.DisplayBoardAndCard(game, currentPlayer, row1, col1, "First");
+                    if (currentPlayer.PlayerType != ePlayerType.Human)
+                    {
+                        System.Threading.Thread.Sleep(2000); // Wait for 2 seconds
+                    }
 
                     (int row2, int col2) = ui.GetMove(game, currentPlayer);
-                    game.RevealCard(row2, col2);
-                    ui.DisplayBoardAndCard(game, row2, col2, "Second");
+                    game.MakeMove(row2, col2, 2);
+                    ui.DisplayBoardAndCard(game, currentPlayer, row2, col2, "Second");
 
-                    if (game.CheckMatch(row1, col1, row2, col2))
+                    game.CheckMove(out IsMatch);
+                    if (IsMatch)
                     {
                         ui.DisplayMatch(currentPlayer.Name);
-                        System.Threading.Thread.Sleep(2000); // Wait for 2 seconds
-                        game.GetCurrentPlayer().IncreaseScore();
-                        ui.ClearScreen();
-                        game.ClearMatchedCards(game.GetBoard().GetCards()[row1, col1].Value);
                     }
                     else
                     {
                         ui.DisplayNoMatch();
-                        System.Threading.Thread.Sleep(2000); // Wait for 2 seconds
-                        game.HideCards(row1, col1, row2, col2);
-                        ui.ClearScreen();
-                        game.SwitchPlayer();
                     }
-
+                    System.Threading.Thread.Sleep(2000); // Wait for 2 seconds
+                    ui.ClearScreen();
                     ui.PrintBoard(game.GetBoard(), revealAll: false);
+
+                    if (game.GetGameState() != GameState.Playing)
+                    {
+                        break;
+                    }
                 }
+
                 ui.ClearScreen();
                 ui.PrintBoard(game.GetBoard(), revealAll: true);
                 ui.DisplayGameOver();
