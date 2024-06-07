@@ -1,18 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace GameLogic
 {
-    public class AIComputerPlayer<T> : ComputerPlayer<T>
+    public class AIComputerPlayer<T>
     {
-        private List<Card<T>> exposedCards;
-        private Card<T> m_savedCardForMatch;
+        private Random random;
+        private List<Card> exposedCards;
+        private Card m_savedCardForMatch;
         private bool m_isCardSaved = false;
-        public AIComputerPlayer(string name) : base(name)
+
+        public string Name { get; }
+        public AIComputerPlayer(string name)
         {
-            exposedCards = new List<Card<T>>();
+            exposedCards = new List<Card>();
         }
 
-        public override (int, int) GetMove(Board<T> board)
+        public (int, int) GetMove(Board board)
         {
             int row, column;
             int returnedRow, returnedColumn;
@@ -62,9 +66,9 @@ namespace GameLogic
             return (row, column);
         }
 
-        public void RememberCard(int row, int col, T value)
+        public void RememberCard(int row, int col, char value)
         {
-            exposedCards.Add(new Card<T>(row, col, value));
+            exposedCards.Add(new Card(row, col, value));
         }
     }
 }

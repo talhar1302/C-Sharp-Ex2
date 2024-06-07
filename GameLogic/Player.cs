@@ -10,11 +10,13 @@ namespace GameLogic
     {
         public string Name { get; }
         public int Score { get; set; }
+        public ePlayerType PlayerType { get; set; }
 
-        public Player(string name)
+        public Player(string name, ePlayerType playerType)
         {
             Name = name;
             Score = 0;
+            PlayerType = playerType;      
         }
 
         public void IncreaseScore()

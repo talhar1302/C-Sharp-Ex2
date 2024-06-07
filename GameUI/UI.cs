@@ -9,8 +9,22 @@ namespace GameUI
     using GameLogic;
     using System;
     using Ex02.ConsoleUtils;
+
     public class UI
     {
+        private const int k_MinBoardSize = 4;
+        private const int k_MaxBoardSize = 6;
+        public const string k_QuitChar = "Q";
+        // Constant dictionary for card values
+        private readonly Dictionary<char, char> CardValues = new Dictionary<char, char>
+        {
+            { 'A', '#' }, { 'B', 'B' }, { 'C', 'C' }, { 'D', 'D' }, { 'E', 'E' }, { 'F', 'F' },
+            { 'G', 'G' }, { 'H', 'H' }, { 'I', 'I' }, { 'J', 'J' }, { 'K', 'K' }, { 'L', 'L' },
+            { 'M', 'M' }, { 'N', 'N' }, { 'O', 'O' }, { 'P', 'P' }, { 'Q', 'Q' }, { 'R', 'R' },
+            { 'S', 'S' }, { 'T', 'T' }, { 'U', 'U' }, { 'V', 'V' }, { 'W', 'W' }, { 'X', 'X' },
+            { 'Y', 'Y' }, { 'Z', 'Z' }
+        };
+
         public void ClearScreen()
         {
             Screen.Clear();
@@ -38,7 +52,7 @@ namespace GameUI
                 Console.Write("Enter the number of columns (4,5,6): ");
                 columns = int.Parse(Console.ReadLine());
 
-                if ((rows >= 4 && rows <= 6) && (columns >= 4 && columns <= 6) && Board<char>.IsValidBoard(rows, columns))
+                if ((rows >= k_MinBoardSize && rows <= k_MaxBoardSize) && (columns >= k_MinBoardSize && columns <= k_MaxBoardSize) && Board.IsValidBoard(rows, columns))
                 {
                     break;
                 }
@@ -50,9 +64,9 @@ namespace GameUI
             return (rows, columns);
         }
 
-        public void PrintBoard(Board<char> board, bool revealAll = false)
+        public void PrintBoard(Board board, bool revealAll = false)
         {
-            Card<char>[,] cards = board.GetCards();
+            Card[,] cards = board.GetCards();
             int rows = cards.GetLength(0);
             int columns = cards.GetLength(1);
 
@@ -81,7 +95,7 @@ namespace GameUI
                 {
                     if (cards[i, j].IsRevealed || revealAll)
                     {
-                        Console.Write(cards[i, j].Value);
+                        Console.Write(CardValues[cards[i, j].Value]); // Printing the predefined adaptive char
                     }
                     else
                     {
@@ -101,7 +115,6 @@ namespace GameUI
             }
         }
 
-
         public void DisplayTurn(Player player)
         {
             Console.WriteLine($"{player.Name}'s turn. Score: {player.Score}");
@@ -112,14 +125,9 @@ namespace GameUI
             Console.WriteLine($"{cardOrder} card: {card}");
         }
 
-        public void DisplayCards(char firstCard, char secondCard)
+        public void DisplayMatch(string i_Name)
         {
-            Console.WriteLine($"First card: {firstCard}, Second card: {secondCard}");
-        }
-
-        public void DisplayMatch()
-        {
-            Console.WriteLine("It's a match! You get another turn.");
+            Console.WriteLine($"It's a match! {i_Name} gets another turn.");
         }
 
         public void DisplayNoMatch()
@@ -140,80 +148,101 @@ namespace GameUI
         public void DisplayGameOver()
         {
             Console.WriteLine("Game over. Thank you for playing!");
-            Console.WriteLine("Press enter to exit");
-            Console.ReadLine();
         }
 
-        public (int, int) GetUserMove(Game<char> game)
+        public void DisplayFinalScores(List<Player> players)
+        {
+            Console.WriteLine("\nFinal Scores:");
+            foreach (var player in players)
+            {
+                Console.WriteLine($"{player.Name}: {player.Score}");
+            }
+        }
+
+        public (int, int) GetUserMove(Game game)
         {
             while (true)
             {
                 Console.Write("Enter a card to reveal (e.g., A1 or Q to quit): ");
                 string input = Console.ReadLine();
-                if (input.ToUpper() == "Q")
+                if (input.ToUpper() == k_QuitChar)
                 {
                     Environment.Exit(0);
                 }
 
-                (int row, int col) = ParseInput(input);
-                if (CheckMoveValidation(game, row, col))
+                (int row, int col)? move = ParseInput(input);
+                if (move == null)
                 {
-                    return (row, col);
+                    Console.WriteLine("Invalid input. Try again.\n");
                 }
-                Console.WriteLine("Invalid input or card already revealed. Try again.\n");
+                else
+                {
+                    eInputError error = CheckMoveValidation(game, move.Value);
+                    switch (error)
+                    {
+                        case eInputError.NoError:
+                            return move.Value;
+                        case eInputError.OutOfBounds:
+                            Console.WriteLine("Position out of bounds. Try again.\n");
+                            break;
+                        case eInputError.CardAlreadyRevealed:
+                            Console.WriteLine("Card has already been revealed. Try again.\n");
+                            break;
+                    }
+                }
             }
         }
 
-        private bool CheckMoveValidation(Game<char>i_game, int i_row, int i_column)
+        private eInputError CheckMoveValidation(Game game, (int row, int col) move)
         {
-            Board<char> board = i_game.GetBoard();
-            return i_game.CheckMoveValidation(i_row, i_column);
+            return game.CheckMoveValidation(move.row, move.col);
         }
-        private (int, int) ParseInput(string input)
+
+        private (int, int)? ParseInput(string input)
         {
+            (int row, int col)? parseInput = null;
             if (input.Length == 2 && char.IsLetter(input[0]) && char.IsDigit(input[1]))
             {
                 int col = char.ToUpper(input[0]) - 'A';
                 int row = int.Parse(input[1].ToString()) - 1;
-                return (row, col);
+                parseInput = (row, col);
             }
-            return (-1, -1);
+            return parseInput;
         }
 
-        public List<char> GenerateCharacterList(int rows, int columns)
+        public (int row, int col) GetMove(Game game, Player currentPlayer)
         {
-            List<char> cardValues = new List<char>();
-            char value = 'A';
-            for (int i = 0; i < (rows * columns) / 2; i++)
+            (int row, int col) move;
+            switch (currentPlayer.PlayerType)
             {
-                cardValues.Add(value);
-                cardValues.Add(value);
-                value++;
+                case ePlayerType.Random:
+                    move = game.GetComputerRandomMove();
+                    break;
+
+                case ePlayerType.AI:
+                    move = game.GetComputerAIMove();
+                    break;
+                default:
+                    move = GetUserMove(game);
+                    break;
             }
-            return cardValues;
+            return move;
         }
 
-        public (int, int) GetMove(Game<char> game)
-        {
-            if (game.GetCurrentPlayer() is ComputerPlayer<char>)
-            {
-                return game.GetComputerMove();
-            }
-            return GetUserMove(game);
-        }
-
-        public void DisplayBoardAndCard(Game<char> game, int row, int col, string cardOrder)
+        public void DisplayBoardAndCard(Game game, int row, int col, string cardOrder)
         {
             ClearScreen();
             PrintBoard(game.GetBoard(), revealAll: false);
             Player currentPlayer = game.GetCurrentPlayer();
             DisplayTurn(currentPlayer);
-            DisplayCard(game.GetBoard().GetCards()[row, col].Value, cardOrder);
-            if(game.GetCurrentPlayer() is ComputerPlayer<char>)
-            System.Threading.Thread.Sleep(2000); // Wait for 2 seconds
+            DisplayCard(CardValues[game.GetBoard().GetCards()[row, col].Value], cardOrder);
+            if (game.GetCurrentPlayer().PlayerType != ePlayerType.Human)
+            {
+                System.Threading.Thread.Sleep(2000); // Wait for 2 seconds
+            }
         }
 
-        public void DisplayWinnerOrTie(Game<char> game)
+        public void DisplayWinnerOrTie(Game game)
         {
             Player winner = game.DetermineWinner();
             if (winner != null)
@@ -224,6 +253,13 @@ namespace GameUI
             {
                 DisplayTie();
             }
+        }
+
+        public bool PromptForNewGame()
+        {
+            Console.WriteLine("Would you like to start a new game? (yes/Q to quit): ");
+            string input = Console.ReadLine().ToLower();
+            return input == "yes";
         }
     }
 }
