@@ -23,9 +23,16 @@ namespace GameUI
                 (rows, columns) = ui.GetBoardSize();
                 List<Player> players = new List<Player> { new Player(ui.GetPlayerName("Enter player 1 name: "), ePlayerType.Human) };
 
-                if (ui.GetYesNoInput("Do you want to play against the computer? (yes/no): "))
+                if (ui.GetYesNoInput())
                 {
-                    players.Add(new Player("Computer", ePlayerType.AI));
+                    if (ui.GetComputerLevel())
+                    {
+                        players.Add(new Player("Computer", ePlayerType.AI));
+                    }
+                    else
+                    {
+                        players.Add(new Player("Computer", ePlayerType.AI_WEAK));
+                    }
                 }
                 else
                 {
@@ -82,9 +89,7 @@ namespace GameUI
 
                 if (!playAgain)
                 {
-                    Console.WriteLine("Thank you for playing!");
-                    Console.WriteLine("Press enter to exit");
-                    Console.ReadLine();
+                    ui.DisplayExitGameMessage();
                 }
 
             } while (playAgain);

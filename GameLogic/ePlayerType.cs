@@ -8,6 +8,7 @@ namespace GameLogic
         {
             Human,
             Random,
-            AI
-        }
+            AI,
+            AI_WEAK
+    }
 }

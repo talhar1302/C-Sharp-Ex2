@@ -5,13 +5,13 @@ namespace GameLogic
 {
     public class Board
     {
-        private Card[,] cards;
+        private Card[,] m_cards;
         private List<char> m_CardValues;
-        private int rows;
-        private int columns;
+        private int m_rows;
+        private int m_columns;
 
-        public int Rows { get => rows; set => rows = value; }
-        public int Columns { get => columns; set => columns = value; }
+        public int Rows { get => m_rows; set => m_rows = value; }
+        public int Columns { get => m_columns; set => m_columns = value; }
 
         public Board(int rows, int columns)
         {
@@ -30,7 +30,7 @@ namespace GameLogic
         {
             m_CardValues = new List<char>();
             char value = 'A';
-            for (int i = 0; i<(rows* columns) / 2; i++)
+            for (int i = 0; i<(m_rows* m_columns) / 2; i++)
             {
                 m_CardValues.Add(value);
                 m_CardValues.Add(value);
@@ -39,14 +39,14 @@ namespace GameLogic
         }
         private void InitializeBoard()
         {
-            cards = new Card[rows, columns];
+            m_cards = new Card[m_rows, m_columns];
             Random random = new Random();
             for (int row = 0; row < Rows; row++)
             {
                 for (int col = 0; col < Columns; col++)
                 {
                     int index = random.Next(m_CardValues.Count);
-                    cards[row, col] = new Card(row, col, m_CardValues[index]);
+                    m_cards[row, col] = new Card(row, col, m_CardValues[index]);
                     m_CardValues.RemoveAt(index);
                 }
             }
@@ -54,23 +54,23 @@ namespace GameLogic
 
         public bool IsRevealed(int row, int col)
         {
-            return cards[row, col].IsRevealed;
+            return m_cards[row, col].IsRevealed;
         }
 
         public char RevealCard(int row, int col)
         {
-            cards[row, col].IsRevealed = true;
-            return cards[row, col].Value;
+            m_cards[row, col].IsRevealed = true;
+            return m_cards[row, col].Value;
         }
 
         public void HideCard(int row, int col)
         {
-            cards[row, col].IsRevealed = false;
+            m_cards[row, col].IsRevealed = false;
         }
 
         public bool AllCardsRevealed()
         {
-            foreach (var card in cards)
+            foreach (var card in m_cards)
             {
                 if (!card.IsRevealed) return false;
             }
@@ -79,7 +79,7 @@ namespace GameLogic
 
         public Card[,] GetCards()
         {
-            return cards;
+            return m_cards;
         }
     }
 }

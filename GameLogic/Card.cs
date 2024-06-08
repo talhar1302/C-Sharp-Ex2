@@ -1,10 +1,13 @@
-﻿namespace GameLogic
+﻿using System;
+
+namespace GameLogic
 {
     public class Card
     {
 
         int m_row;
         int m_column;
+        
 
         public char Value { get; }
         public bool IsRevealed { get; set; }

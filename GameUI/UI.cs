@@ -16,7 +16,7 @@ namespace GameUI
         private const int k_MaxBoardSize = 6;
         public const string k_QuitChar = "Q";
         // Constant dictionary for card values
-        private readonly Dictionary<char, char> CardValues = new Dictionary<char, char>
+        private readonly Dictionary<char, char> r_CardValues = new Dictionary<char, char>
         {
             { 'A', 'A' }, { 'B', 'B' }, { 'C', 'C' }, { 'D', 'D' }, { 'E', 'E' }, { 'F', 'F' },
             { 'G', 'G' }, { 'H', 'H' }, { 'I', 'I' }, { 'J', 'J' }, { 'K', 'K' }, { 'L', 'L' },
@@ -30,12 +30,12 @@ namespace GameUI
             Screen.Clear();
         }
 
-        public string GetPlayerName(string prompt)
+        public string GetPlayerName(string i_prompt)
         {
             string playerName;
             do
             {
-                Console.Write(prompt);
+                Console.Write(i_prompt);
                 playerName = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(playerName))
                 {
@@ -45,12 +45,12 @@ namespace GameUI
             return playerName;
         }
 
-        public bool GetYesNoInput(string prompt)
+        public bool GetYesNoInput()
         {
             string input;
             do
             {
-                Console.Write(prompt);
+                Console.Write("Do you want to play against the computer? (yes/no): ");
                 input = Console.ReadLine().ToLower();
                 if (input != "yes" && input != "no")
                 {
@@ -88,9 +88,9 @@ namespace GameUI
             return (rows, columns);
         }
 
-        public void PrintBoard(Board board, bool revealAll = false)
+        public void PrintBoard(Board i_board, bool revealAll = false)
         {
-            Card[,] cards = board.GetCards();
+            Card[,] cards = i_board.GetCards();
             int rows = cards.GetLength(0);
             int columns = cards.GetLength(1);
 
@@ -119,7 +119,7 @@ namespace GameUI
                 {
                     if (cards[i, j].IsRevealed || revealAll)
                     {
-                        Console.Write(CardValues[cards[i, j].Value]); // Printing the predefined adaptive char
+                        Console.Write(r_CardValues[cards[i, j].Value]); // Printing the predefined adaptive char
                     }
                     else
                     {
@@ -139,9 +139,9 @@ namespace GameUI
             }
         }
 
-        public void DisplayTurn(Player player)
+        public void DisplayTurn(Player i_player)
         {
-            Console.WriteLine($"{player.Name}'s turn. Score: {player.Score}");
+            Console.WriteLine($"{i_player.Name}'s turn. Score: {i_player.Score}");
         }
 
         public void DisplayCard(char card, string cardOrder)
@@ -159,9 +159,9 @@ namespace GameUI
             Console.WriteLine("Not a match.");
         }
 
-        public void DisplayWinner(Player player)
+        public void DisplayWinner(Player i_player)
         {
-            Console.WriteLine($"{player.Name} wins with {player.Score} points!");
+            Console.WriteLine($"{i_player.Name} wins with {i_player.Score} points!");
         }
 
         public void DisplayTie()
@@ -174,16 +174,16 @@ namespace GameUI
             Console.WriteLine("Game over. Thank you for playing!");
         }
 
-        public void DisplayFinalScores(List<Player> players)
+        public void DisplayFinalScores(List<Player> i_players)
         {
             Console.WriteLine("\nFinal Scores:");
-            foreach (var player in players)
+            foreach (var player in i_players)
             {
                 Console.WriteLine($"{player.Name}: {player.Score}");
             }
         }
 
-        public (int, int) GetUserMove(Game game)
+        public (int, int) GetUserMove(Game i_game)
         {
             while (true)
             {
@@ -201,7 +201,7 @@ namespace GameUI
                 }
                 else
                 {
-                    eInputError error = CheckMoveValidation(game, move.Value);
+                    eInputError error = CheckMoveValidation(i_game, move.Value);
                     switch (error)
                     {
                         case eInputError.NoError:
@@ -217,58 +217,61 @@ namespace GameUI
             }
         }
 
-        private eInputError CheckMoveValidation(Game game, (int row, int col) move)
+        private eInputError CheckMoveValidation(Game i_game, (int row, int col) i_move)
         {
-            return game.CheckMoveValidation(move.row, move.col);
+            return i_game.CheckMoveValidation(i_move.row, i_move.col);
         }
 
-        private (int, int)? ParseInput(string input)
+        private (int, int)? ParseInput(string i_input)
         {
             (int row, int col)? parseInput = null;
-            if (input.Length == 2 && char.IsLetter(input[0]) && char.IsDigit(input[1]))
+            if (i_input.Length == 2 && char.IsLetter(i_input[0]) && char.IsDigit(i_input[1]))
             {
-                int col = char.ToUpper(input[0]) - 'A';
-                int row = int.Parse(input[1].ToString()) - 1;
+                int col = char.ToUpper(i_input[0]) - 'A';
+                int row = int.Parse(i_input[1].ToString()) - 1;
                 parseInput = (row, col);
             }
             return parseInput;
         }
 
-        public (int row, int col) GetMove(Game game, Player currentPlayer)
+        public (int row, int col) GetMove(Game i_game, Player i_currentPlayer)
         {
             (int row, int col) move;
-            switch (currentPlayer.PlayerType)
+            switch (i_currentPlayer.PlayerType)
             {
                 case ePlayerType.Random:
-                    move = game.GetComputerRandomMove();
+                    move = i_game.GetComputerRandomMove();
                     break;
 
                 case ePlayerType.AI:
-                    move = game.GetComputerAIMove();
+                    move = i_game.GetComputerAIMove();
+                    break;
+                case ePlayerType.AI_WEAK:
+                    move = i_game.GetComputerRandomMove();
                     break;
                 default:
-                    move = GetUserMove(game);
+                    move = GetUserMove(i_game);
                     break;
             }
             return move;
         }
 
-        public void DisplayBoardAndCard(Game game, Player currentPlayer, int row, int col, string cardOrder)
+        public void DisplayBoardAndCard(Game i_game, Player i_currentPlayer, int i_row, int i_col, string i_cardOrder)
         {
             ClearScreen();
-            PrintBoard(game.GetBoard(), revealAll: false);
-            DisplayTurn(currentPlayer);
-            DisplayCard(CardValues[game.GetBoard().GetCards()[row, col].Value], cardOrder);        
+            PrintBoard(i_game.GetBoard(), revealAll: false);
+            DisplayTurn(i_currentPlayer);
+            DisplayCard(r_CardValues[i_game.GetBoard().GetCards()[i_row, i_col].Value], i_cardOrder);        
         }
 
-        public void DisplayWinnerOrTie(Game game)
+        public void DisplayWinnerOrTie(Game i_game)
         {
-            Player winner = game.DetermineWinner();
-            if (game.GetGameState() == GameState.Win)
+            Player winner = i_game.DetermineWinner();
+            if (i_game.GetGameState() == GameState.Win)
             {
                 Console.WriteLine($"The winner is {winner.Name} with {winner.Score} points!");
             }
-            else if (game.GetGameState() == GameState.Draw)
+            else if (i_game.GetGameState() == GameState.Draw)
             {
                 Console.WriteLine("The game is a draw!");
             }
@@ -288,6 +291,30 @@ namespace GameUI
             } while (input != "yes" && input != "q");
 
             return input == "yes";
+        }
+
+        public bool GetComputerLevel()
+        {
+            string input;
+            do
+            {
+                Console.WriteLine("Do you want the computer to play on hard difficulty (yes/no):");
+                input = Console.ReadLine().ToLower();
+                if (input != "yes" && input != "no")
+                {
+                    Console.WriteLine("Invalid input. Please enter 'yes' or 'no'.");
+                }
+            } while (input != "yes" && input != "no");
+
+            return input == "yes";
+
+        }
+
+        public void DisplayExitGameMessage()
+        {
+            Console.WriteLine("Thank you for playing!");
+            Console.WriteLine("Press enter to exit");
+            Console.ReadLine();
         }
     }
 }
