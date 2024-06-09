@@ -15,7 +15,7 @@ namespace GameUI
 
         public void Run()
         {
-            bool playAgain, IsMatch;
+            bool m_playAgain, m_IsMatch;
             do
             {
                 ui.ClearScreen();
@@ -60,8 +60,8 @@ namespace GameUI
                     game.MakeMove(row2, col2, 2);
                     ui.DisplayBoardAndCard(game, currentPlayer, row2, col2, "Second");
 
-                    game.CheckMove(out IsMatch);
-                    if (IsMatch)
+                    game.CheckMove(out m_IsMatch);
+                    if (m_IsMatch)
                     {
                         ui.DisplayMatch(currentPlayer.Name);
                     }
@@ -85,14 +85,14 @@ namespace GameUI
                 ui.DisplayFinalScores(players);
                 ui.DisplayWinnerOrTie(game);
 
-                playAgain = ui.PromptForNewGame();
+                m_playAgain = ui.PromptForNewGame();
 
-                if (!playAgain)
+                if (!m_playAgain)
                 {
                     ui.DisplayExitGameMessage();
                 }
 
-            } while (playAgain);
+            } while (m_playAgain);
         }
     }
 }

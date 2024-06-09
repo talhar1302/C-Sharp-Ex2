@@ -30,12 +30,12 @@ namespace GameUI
             Screen.Clear();
         }
 
-        public string GetPlayerName(string i_prompt)
+        public string GetPlayerName(string i_Prompt)
         {
             string playerName;
             do
             {
-                Console.Write(i_prompt);
+                Console.Write(i_Prompt);
                 playerName = Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(playerName))
                 {
@@ -88,9 +88,9 @@ namespace GameUI
             return (rows, columns);
         }
 
-        public void PrintBoard(Board i_board, bool revealAll = false)
+        public void PrintBoard(Board i_Board, bool revealAll = false)
         {
-            Card[,] cards = i_board.GetCards();
+            Card[,] cards = i_Board.GetCards();
             int rows = cards.GetLength(0);
             int columns = cards.GetLength(1);
 
@@ -139,14 +139,14 @@ namespace GameUI
             }
         }
 
-        public void DisplayTurn(Player i_player)
+        public void DisplayTurn(Player i_Player)
         {
-            Console.WriteLine($"{i_player.Name}'s turn. Score: {i_player.Score}");
+            Console.WriteLine($"{i_Player.Name}'s turn. Score: {i_Player.Score}");
         }
 
-        public void DisplayCard(char card, string cardOrder)
+        public void DisplayCard(char i_Card, string i_CardOrder)
         {
-            Console.WriteLine($"{cardOrder} card: {card}");
+            Console.WriteLine($"{i_CardOrder} card: {i_Card}");
         }
 
         public void DisplayMatch(string i_Name)
@@ -159,9 +159,9 @@ namespace GameUI
             Console.WriteLine("Not a match.");
         }
 
-        public void DisplayWinner(Player i_player)
+        public void DisplayWinner(Player i_Player)
         {
-            Console.WriteLine($"{i_player.Name} wins with {i_player.Score} points!");
+            Console.WriteLine($"{i_Player.Name} wins with {i_Player.Score} points!");
         }
 
         public void DisplayTie()
@@ -174,16 +174,16 @@ namespace GameUI
             Console.WriteLine("Game over. Thank you for playing!");
         }
 
-        public void DisplayFinalScores(List<Player> i_players)
+        public void DisplayFinalScores(List<Player> i_Players)
         {
             Console.WriteLine("\nFinal Scores:");
-            foreach (var player in i_players)
+            foreach (var player in i_Players)
             {
                 Console.WriteLine($"{player.Name}: {player.Score}");
             }
         }
 
-        public (int, int) GetUserMove(Game i_game)
+        public (int, int) GetUserMove(Game i_Game)
         {
             while (true)
             {
@@ -201,7 +201,7 @@ namespace GameUI
                 }
                 else
                 {
-                    eInputError error = CheckMoveValidation(i_game, move.Value);
+                    eInputError error = CheckMoveValidation(i_Game, move.Value);
                     switch (error)
                     {
                         case eInputError.NoError:
@@ -217,61 +217,61 @@ namespace GameUI
             }
         }
 
-        private eInputError CheckMoveValidation(Game i_game, (int row, int col) i_move)
+        private eInputError CheckMoveValidation(Game i_Game, (int row, int col) i_Move)
         {
-            return i_game.CheckMoveValidation(i_move.row, i_move.col);
+            return i_Game.CheckMoveValidation(i_Move.row, i_Move.col);
         }
 
-        private (int, int)? ParseInput(string i_input)
+        private (int, int)? ParseInput(string i_Input)
         {
             (int row, int col)? parseInput = null;
-            if (i_input.Length == 2 && char.IsLetter(i_input[0]) && char.IsDigit(i_input[1]))
+            if (i_Input.Length == 2 && char.IsLetter(i_Input[0]) && char.IsDigit(i_Input[1]))
             {
-                int col = char.ToUpper(i_input[0]) - 'A';
-                int row = int.Parse(i_input[1].ToString()) - 1;
+                int col = char.ToUpper(i_Input[0]) - 'A';
+                int row = int.Parse(i_Input[1].ToString()) - 1;
                 parseInput = (row, col);
             }
             return parseInput;
         }
 
-        public (int row, int col) GetMove(Game i_game, Player i_currentPlayer)
+        public (int row, int col) GetMove(Game i_Game, Player i_CurrentPlayer)
         {
             (int row, int col) move;
-            switch (i_currentPlayer.PlayerType)
+            switch (i_CurrentPlayer.PlayerType)
             {
                 case ePlayerType.Random:
-                    move = i_game.GetComputerRandomMove();
+                    move = i_Game.GetComputerRandomMove();
                     break;
 
                 case ePlayerType.AI:
-                    move = i_game.GetComputerAIMove();
+                    move = i_Game.GetComputerAIMove();
                     break;
                 case ePlayerType.AI_WEAK:
-                    move = i_game.GetComputerRandomMove();
+                    move = i_Game.GetComputerRandomMove();
                     break;
                 default:
-                    move = GetUserMove(i_game);
+                    move = GetUserMove(i_Game);
                     break;
             }
             return move;
         }
 
-        public void DisplayBoardAndCard(Game i_game, Player i_currentPlayer, int i_row, int i_col, string i_cardOrder)
+        public void DisplayBoardAndCard(Game i_Game, Player i_CurrentPlayer, int i_row, int i_col, string i_CardOrder)
         {
             ClearScreen();
-            PrintBoard(i_game.GetBoard(), revealAll: false);
-            DisplayTurn(i_currentPlayer);
-            DisplayCard(r_CardValues[i_game.GetBoard().GetCards()[i_row, i_col].Value], i_cardOrder);        
+            PrintBoard(i_Game.GetBoard(), revealAll: false);
+            DisplayTurn(i_CurrentPlayer);
+            DisplayCard(r_CardValues[i_Game.GetBoard().GetCards()[i_row, i_col].Value], i_CardOrder);        
         }
 
-        public void DisplayWinnerOrTie(Game i_game)
+        public void DisplayWinnerOrTie(Game i_Game)
         {
-            Player winner = i_game.DetermineWinner();
-            if (i_game.GetGameState() == GameState.Win)
+            Player winner = i_Game.DetermineWinner();
+            if (i_Game.GetGameState() == GameState.Win)
             {
                 Console.WriteLine($"The winner is {winner.Name} with {winner.Score} points!");
             }
-            else if (i_game.GetGameState() == GameState.Draw)
+            else if (i_Game.GetGameState() == GameState.Draw)
             {
                 Console.WriteLine("The game is a draw!");
             }

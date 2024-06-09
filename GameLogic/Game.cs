@@ -7,41 +7,41 @@ namespace GameLogic
     public class Game
     {
         private Random random = new Random();
-        private Board m_board;
+        private Board m_Board;
         private bool m_ExistAIPlayer = false;
-        private List<Player> m_players;
-        private Dictionary<char, List<Card>> rememberedCards;
+        private List<Player> m_Players;
+        private Dictionary<char, List<Card>> m_RememberedCards;
         private Card[] m_SavedCardsForMatch;
-        private int m_currentPlayerIndex;
+        private int m_CurrentPlayerIndex;
         private (int row, int col) m_SavedFirstMoveLocation;
         private (int row, int col) m_SavedSecondMoveLocation;
         private GameState gameState;
 
-        public Game(int rows, int columns, List<Player> playerNames)
+        public Game(int i_Rows, int i_Columns, List<Player> i_PlayerNames)
         {
-            m_board = new Board(rows, columns);
-            m_players = new List<Player>();
+            m_Board = new Board(i_Rows, i_Columns);
+            m_Players = new List<Player>();
 
-            foreach (var player in playerNames)
+            foreach (var player in i_PlayerNames)
             {
                 if (player.PlayerType == ePlayerType.AI)
                     m_ExistAIPlayer = true;
-                m_players.Add(player);
+                m_Players.Add(player);
             }
-            rememberedCards = new Dictionary<char, List<Card>>();
+            m_RememberedCards = new Dictionary<char, List<Card>>();
             m_SavedCardsForMatch = new Card[2];
-            m_currentPlayerIndex = 0;
+            m_CurrentPlayerIndex = 0;
             gameState = GameState.Playing;
         }
 
         public Board GetBoard()
         {
-            return m_board;
+            return m_Board;
         }
 
         public Player GetCurrentPlayer()
         {
-            return m_players[m_currentPlayerIndex];
+            return m_Players[m_CurrentPlayerIndex];
         }
 
         public GameState GetGameState()
@@ -49,16 +49,16 @@ namespace GameLogic
             return gameState;
         }
 
-        public void MakeMove(int i_row, int i_col, int i_NumOfCalling)
+        public void MakeMove(int i_Row, int i_Col, int i_NumOfCalling)
         {
-            RevealCard(i_row, i_col);
+            RevealCard(i_Row, i_Col);
             if (i_NumOfCalling == 1)
             {
-                m_SavedFirstMoveLocation = (i_row, i_col);
+                m_SavedFirstMoveLocation = (i_Row, i_Col);
             }
             if (i_NumOfCalling == 2)
             {
-                m_SavedSecondMoveLocation = (i_row, i_col);
+                m_SavedSecondMoveLocation = (i_Row, i_Col);
             }
         }
 
@@ -84,52 +84,52 @@ namespace GameLogic
                 UpdateGameState();
             }
         }
-        public void RevealCard(int i_row, int i_col)
+        public void RevealCard(int i_Row, int i_Col)
         {
-            char value = m_board.RevealCard(i_row, i_col);
+            char value = m_Board.RevealCard(i_Row, i_Col);
             if (m_ExistAIPlayer)
             {
-                RememberCard(i_row, i_col, value);
+                RememberCard(i_Row, i_Col, value);
             }
         }
 
-        public void HideCards(int i_row1, int i_col1, int i_row2, int i_col2)
+        public void HideCards(int i_Row1, int i_Col1, int i_Row2, int i_Col2)
         {
-            m_board.HideCard(i_row1, i_col1);
-            m_board.HideCard(i_row2, i_col2);
+            m_Board.HideCard(i_Row1, i_Col1);
+            m_Board.HideCard(i_Row2, i_Col2);
         }
 
         public bool AllCardsRevealed()
         {
-            return m_board.AllCardsRevealed();
+            return m_Board.AllCardsRevealed();
         }
 
-        public eInputError CheckMoveValidation(int i_row, int i_col)
+        public eInputError CheckMoveValidation(int i_Row, int i_Col)
         {
-            if (!(i_row >= 0 && i_col >= 0 && i_row < m_board.Rows && i_col < m_board.Columns))
+            if (!(i_Row >= 0 && i_Col >= 0 && i_Row < m_Board.Rows && i_Col < m_Board.Columns))
             {
                 return eInputError.OutOfBounds;
             }
-            if (m_board.IsRevealed(i_row, i_col))
+            if (m_Board.IsRevealed(i_Row, i_Col))
             {
                 return eInputError.CardAlreadyRevealed;
             }
             return eInputError.NoError;
         }
 
-        public bool CheckMatch(int i_row1, int i_col1, int i_row2, int i_col2)
+        public bool CheckMatch(int i_Row1, int i_Col1, int i_Row2, int i_Col2)
         {
-            return m_board.GetCards()[i_row1, i_col1].Value.Equals(m_board.GetCards()[i_row2, i_col2].Value);
+            return m_Board.GetCards()[i_Row1, i_Col1].Value.Equals(m_Board.GetCards()[i_Row2, i_Col2].Value);
         }
 
         public void SwitchPlayer()
         {
-            m_currentPlayerIndex = (m_currentPlayerIndex + 1) % m_players.Count;
+            m_CurrentPlayerIndex = (m_CurrentPlayerIndex + 1) % m_Players.Count;
         }
 
         public Player DetermineWinner()
         {
-            return m_players.OrderByDescending(p => p.Score).FirstOrDefault();
+            return m_Players.OrderByDescending(p => p.Score).FirstOrDefault();
         }
 
         public (int, int) GetComputerRandomMove()
@@ -137,9 +137,9 @@ namespace GameLogic
             int row, col;
             do
             {
-                row = random.Next(m_board.Rows);
-                col = random.Next(m_board.Columns);
-            } while (m_board.IsRevealed(row, col));
+                row = random.Next(m_Board.Rows);
+                col = random.Next(m_Board.Columns);
+            } while (m_Board.IsRevealed(row, col));
 
             return (row, col);
         }
@@ -161,39 +161,39 @@ namespace GameLogic
             }
 
             (int row, int col) firstMove = GetComputerRandomMove();
-            char firstValue = m_board.GetCards()[firstMove.row, firstMove.col].Value;
+            char firstValue = m_Board.GetCards()[firstMove.row, firstMove.col].Value;
 
             RememberCard(firstMove.row, firstMove.col, firstValue);
 
             return firstMove;
         }
 
-        public void RememberCard(int i_row, int i_col, char i_value)
+        public void RememberCard(int i_Row, int i_Col, char i_Value)
         {
-            Card card = new Card(i_row, i_col, i_value);
-            if (!rememberedCards.ContainsKey(i_value))
+            Card card = new Card(i_Row, i_Col, i_Value);
+            if (!m_RememberedCards.ContainsKey(i_Value))
             {
-                rememberedCards[i_value] = new List<Card>();
+                m_RememberedCards[i_Value] = new List<Card>();
             }
             else
             {
-                rememberedCards[i_value].RemoveAll(c => c.Row == i_row && c.Column == i_col);
+                m_RememberedCards[i_Value].RemoveAll(c => c.Row == i_Row && c.Column == i_Col);
             }
-            rememberedCards[i_value].Add(card);
+            m_RememberedCards[i_Value].Add(card);
 
-            if (rememberedCards[i_value].Count == 2)
+            if (m_RememberedCards[i_Value].Count == 2)
             {
-                m_SavedCardsForMatch[0] = rememberedCards[i_value][0];
-                m_SavedCardsForMatch[1] = rememberedCards[i_value][1];
+                m_SavedCardsForMatch[0] = m_RememberedCards[i_Value][0];
+                m_SavedCardsForMatch[1] = m_RememberedCards[i_Value][1];
             }
         }
 
-        public void ClearMatchedCards(char i_value)
+        public void ClearMatchedCards(char i_Value)
         {          
-            if (rememberedCards.ContainsKey(i_value))
+            if (m_RememberedCards.ContainsKey(i_Value))
             {
-                rememberedCards[i_value].Clear();
-                rememberedCards.Remove(i_value);
+                m_RememberedCards[i_Value].Clear();
+                m_RememberedCards.Remove(i_Value);
                 m_SavedCardsForMatch[0] = null;
                 m_SavedCardsForMatch[1] = null;
             }
@@ -202,7 +202,7 @@ namespace GameLogic
         private void UpdateGameState()
         {
             Player winner = DetermineWinner();
-            if (winner != null && m_players.Count(p => p.Score == winner.Score) > 1)
+            if (winner != null && m_Players.Count(p => p.Score == winner.Score) > 1)
             {
                 gameState = GameState.Draw;
             }

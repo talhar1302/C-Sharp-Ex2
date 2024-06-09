@@ -5,20 +5,23 @@ namespace GameLogic
     public class Card
     {
 
-        int m_row;
-        int m_column;
+        private int m_Row;
+        private int m_Column;
+        private char m_Value;
+        private bool m_IsRevealed;
+        
         
 
-        public char Value { get; }
-        public bool IsRevealed { get; set; }
-        public int Row { get => m_row; set => m_row = value; }
-        public int Column { get => m_column; set => m_column = value; }
+        public char Value { get => m_Value; set => m_Value =value; }
+        public bool IsRevealed { get => m_IsRevealed; set => m_IsRevealed=value; }
+        public int Row { get => m_Row; set => m_Row = value; }
+        public int Column { get => m_Column; set => m_Column = value; }
 
-        public Card(int row, int col,char value)
+        public Card(int I_Row, int i_Col,char i_Value)
         {
-            Row = row;
-            Column = col;
-            Value = value;
+            Row = I_Row;
+            Column = i_Col;
+            Value = i_Value;
             IsRevealed = false;
         }
     }

@@ -5,32 +5,32 @@ namespace GameLogic
 {
     public class Board
     {
-        private Card[,] m_cards;
+        private Card[,] m_Cards;
         private List<char> m_CardValues;
-        private int m_rows;
-        private int m_columns;
+        private int m_Rows;
+        private int m_Columns;
 
-        public int Rows { get => m_rows; set => m_rows = value; }
-        public int Columns { get => m_columns; set => m_columns = value; }
+        public int Rows { get => m_Rows; set => m_Rows = value; }
+        public int Columns { get => m_Columns; set => m_Columns = value; }
 
-        public Board(int rows, int columns)
+        public Board(int i_Rows, int i_Columns)
         {
-            this.Rows = rows;
-            this.Columns = columns;
+            this.Rows = i_Rows;
+            this.Columns = i_Columns;
             InitializeCards();
             InitializeBoard();
         }
 
-        public static bool IsValidBoard(int rows, int columns)
+        public static bool IsValidBoard(int i_Rows, int i_Columns)
         {
-            return (rows * columns) % 2 == 0;
+            return (i_Rows * i_Columns) % 2 == 0;
         }
 
         private void InitializeCards()
         {
             m_CardValues = new List<char>();
             char value = 'A';
-            for (int i = 0; i<(m_rows* m_columns) / 2; i++)
+            for (int i = 0; i<(m_Rows* m_Columns) / 2; i++)
             {
                 m_CardValues.Add(value);
                 m_CardValues.Add(value);
@@ -39,38 +39,38 @@ namespace GameLogic
         }
         private void InitializeBoard()
         {
-            m_cards = new Card[m_rows, m_columns];
+            m_Cards = new Card[m_Rows, m_Columns];
             Random random = new Random();
             for (int row = 0; row < Rows; row++)
             {
                 for (int col = 0; col < Columns; col++)
                 {
                     int index = random.Next(m_CardValues.Count);
-                    m_cards[row, col] = new Card(row, col, m_CardValues[index]);
+                    m_Cards[row, col] = new Card(row, col, m_CardValues[index]);
                     m_CardValues.RemoveAt(index);
                 }
             }
         }
 
-        public bool IsRevealed(int row, int col)
+        public bool IsRevealed(int i_Row, int i_Col)
         {
-            return m_cards[row, col].IsRevealed;
+            return m_Cards[i_Row, i_Col].IsRevealed;
         }
 
-        public char RevealCard(int row, int col)
+        public char RevealCard(int i_Row, int i_Col)
         {
-            m_cards[row, col].IsRevealed = true;
-            return m_cards[row, col].Value;
+            m_Cards[i_Row, i_Col].IsRevealed = true;
+            return m_Cards[i_Row, i_Col].Value;
         }
 
-        public void HideCard(int row, int col)
+        public void HideCard(int i_Row, int i_Col)
         {
-            m_cards[row, col].IsRevealed = false;
+            m_Cards[i_Row, i_Col].IsRevealed = false;
         }
 
         public bool AllCardsRevealed()
         {
-            foreach (var card in m_cards)
+            foreach (var card in m_Cards)
             {
                 if (!card.IsRevealed) return false;
             }
@@ -79,7 +79,7 @@ namespace GameLogic
 
         public Card[,] GetCards()
         {
-            return m_cards;
+            return m_Cards;
         }
     }
 }

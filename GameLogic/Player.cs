@@ -8,15 +8,18 @@ namespace GameLogic
 {
     public class Player
     {
-        public string Name { get; }
-        public int Score { get; set; }
-        public ePlayerType PlayerType { get; set; }
+        private string m_Name;
+        private int m_Score;
+        private ePlayerType m_PlayerType;
+        public string Name { get => m_Name; set => m_Name = value; }
+        public int Score { get=> m_Score; set => m_Score=value; }
+        public ePlayerType PlayerType { get => m_PlayerType; set => m_PlayerType = value; }
 
-        public Player(string name, ePlayerType playerType)
+        public Player(string i_Name, ePlayerType i_PlayerType)
         {
-            Name = name;
+            Name = i_Name;
             Score = 0;
-            PlayerType = playerType;      
+            PlayerType = i_PlayerType;      
         }
 
         public void IncreaseScore()
