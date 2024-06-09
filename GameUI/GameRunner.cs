@@ -15,7 +15,7 @@ namespace GameUI
 
         public void Run()
         {
-            bool m_playAgain, m_IsMatch;
+            bool playAgain, IsMatch;
             do
             {
                 ui.ClearScreen();
@@ -31,7 +31,7 @@ namespace GameUI
                     }
                     else
                     {
-                        players.Add(new Player("Computer", ePlayerType.AI_WEAK));
+                        players.Add(new Player("Computer", ePlayerType.ComputerRandom));
                     }
                 }
                 else
@@ -43,12 +43,18 @@ namespace GameUI
                 ui.ClearScreen();
                 ui.PrintBoard(game.GetBoard(), revealAll: false);
 
-                while (game.GetGameState() == GameState.Playing)
+                while (game.GetGameState() == eGameState.Playing)
                 {
                     Player currentPlayer = game.GetCurrentPlayer();
                     ui.DisplayTurn(currentPlayer);
 
                     (int row1, int col1) = ui.GetMove(game, currentPlayer);
+                    if (row1 == -1)
+                    {
+                        playAgain = false;
+                        ui.DisplayExitGameMessage();
+                        goto Exit;
+                    }
                     game.MakeMove(row1, col1, 1);
                     ui.DisplayBoardAndCard(game, currentPlayer, row1, col1, "First");
                     if (currentPlayer.PlayerType != ePlayerType.Human)
@@ -57,11 +63,17 @@ namespace GameUI
                     }
 
                     (int row2, int col2) = ui.GetMove(game, currentPlayer);
+                    if (row2 == -1)
+                    {
+                        playAgain = false;
+                        ui.DisplayExitGameMessage();
+                        goto Exit;
+                    }
                     game.MakeMove(row2, col2, 2);
                     ui.DisplayBoardAndCard(game, currentPlayer, row2, col2, "Second");
 
-                    game.CheckMove(out m_IsMatch);
-                    if (m_IsMatch)
+                    game.CheckMove(out IsMatch);
+                    if (IsMatch)
                     {
                         ui.DisplayMatch(currentPlayer.Name);
                     }
@@ -73,7 +85,7 @@ namespace GameUI
                     ui.ClearScreen();
                     ui.PrintBoard(game.GetBoard(), revealAll: false);
 
-                    if (game.GetGameState() != GameState.Playing)
+                    if (game.GetGameState() != eGameState.Playing)
                     {
                         break;
                     }
@@ -85,14 +97,16 @@ namespace GameUI
                 ui.DisplayFinalScores(players);
                 ui.DisplayWinnerOrTie(game);
 
-                m_playAgain = ui.PromptForNewGame();
+                playAgain = ui.PromptForNewGame();
 
-                if (!m_playAgain)
+                if (!playAgain)
                 {
                     ui.DisplayExitGameMessage();
                 }
 
-            } while (m_playAgain);
+            } while (playAgain);
+        Exit:
+            return;
         }
     }
 }

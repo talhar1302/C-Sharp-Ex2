@@ -5,6 +5,7 @@ namespace GameLogic
 {
     public class Board
     {
+        private const char r_FirstCardValue = 'A';
         private Card[,] m_Cards;
         private List<char> m_CardValues;
         private int m_Rows;
@@ -13,10 +14,12 @@ namespace GameLogic
         public int Rows { get => m_Rows; set => m_Rows = value; }
         public int Columns { get => m_Columns; set => m_Columns = value; }
 
+        public static char FirstCardValue { get => r_FirstCardValue; }
+
         public Board(int i_Rows, int i_Columns)
         {
-            this.Rows = i_Rows;
-            this.Columns = i_Columns;
+            Rows = i_Rows;
+            Columns = i_Columns;
             InitializeCards();
             InitializeBoard();
         }
@@ -29,7 +32,7 @@ namespace GameLogic
         private void InitializeCards()
         {
             m_CardValues = new List<char>();
-            char value = 'A';
+            char value = R_FirstCardValue;
             for (int i = 0; i<(m_Rows* m_Columns) / 2; i++)
             {
                 m_CardValues.Add(value);

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GameLogic
 {
-    public enum GameState
+    public enum eGameState
     {
         Playing,
         Draw,

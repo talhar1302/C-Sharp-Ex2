@@ -44,7 +44,7 @@ namespace GameLogic
             return m_Players[m_CurrentPlayerIndex];
         }
 
-        public GameState GetGameState()
+        public eGameState GetGameState()
         {
             return gameState;
         }

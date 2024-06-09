@@ -183,15 +183,17 @@ namespace GameUI
             }
         }
 
-        public (int, int) GetUserMove(Game i_Game)
+        public (int, int) GetUserMove(Game i_game)
         {
-            while (true)
+            (int row, int col) returnedMove = (-1, -1);
+            bool validInput = false;
+            while (validInput == false)
             {
                 Console.Write("Enter a card to reveal (e.g., A1 or Q to quit): ");
                 string input = Console.ReadLine();
                 if (input.ToUpper() == k_QuitChar)
                 {
-                    Environment.Exit(0);
+                    break;
                 }
 
                 (int row, int col)? move = ParseInput(input);
@@ -201,11 +203,13 @@ namespace GameUI
                 }
                 else
                 {
-                    eInputError error = CheckMoveValidation(i_Game, move.Value);
+                    eInputError error = CheckMoveValidation(i_game, move.Value);
                     switch (error)
                     {
                         case eInputError.NoError:
-                            return move.Value;
+                            validInput = true;
+                            returnedMove = move.Value;
+                            break;
                         case eInputError.OutOfBounds:
                             Console.WriteLine("Position out of bounds. Try again.\n");
                             break;
@@ -215,6 +219,7 @@ namespace GameUI
                     }
                 }
             }
+            return returnedMove;
         }
 
         private eInputError CheckMoveValidation(Game i_Game, (int row, int col) i_Move)
@@ -227,7 +232,7 @@ namespace GameUI
             (int row, int col)? parseInput = null;
             if (i_Input.Length == 2 && char.IsLetter(i_Input[0]) && char.IsDigit(i_Input[1]))
             {
-                int col = char.ToUpper(i_Input[0]) - 'A';
+                int col = char.ToUpper(i_Input[0]) - Board.FirstCardValue;
                 int row = int.Parse(i_Input[1].ToString()) - 1;
                 parseInput = (row, col);
             }
@@ -239,15 +244,12 @@ namespace GameUI
             (int row, int col) move;
             switch (i_CurrentPlayer.PlayerType)
             {
-                case ePlayerType.Random:
+                case ePlayerType.ComputerRandom:
                     move = i_Game.GetComputerRandomMove();
                     break;
 
                 case ePlayerType.AI:
                     move = i_Game.GetComputerAIMove();
-                    break;
-                case ePlayerType.AI_WEAK:
-                    move = i_Game.GetComputerRandomMove();
                     break;
                 default:
                     move = GetUserMove(i_Game);
