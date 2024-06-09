@@ -6,107 +6,75 @@ namespace GameUI
 {
     public class GameRunner
     {
-        private UI ui;
-
-        public GameRunner(UI ui)
+        private readonly UI r_UI;
+        public GameRunner(UI i_UI)
         {
-            this.ui = ui;
+            r_UI = i_UI;
         }
-
         public void Run()
         {
-            bool playAgain, IsMatch;
+            bool playAgain = true;
             do
             {
-                ui.ClearScreen();
-                int rows, columns;
-                (rows, columns) = ui.GetBoardSize();
-                List<Player> players = new List<Player> { new Player(ui.GetPlayerName("Enter player 1 name: "), ePlayerType.Human) };
-
-                if (ui.GetYesNoInput())
-                {
-                    if (ui.GetComputerLevel())
-                    {
-                        players.Add(new Player("Computer", ePlayerType.AI));
-                    }
-                    else
-                    {
-                        players.Add(new Player("Computer", ePlayerType.ComputerRandom));
-                    }
-                }
-                else
-                {
-                    players.Add(new Player(ui.GetPlayerName("Enter player 2 name: "), ePlayerType.Human));
-                }
-
+                r_UI.ClearScreen();
+                var (rows, columns) = r_UI.GetBoardSize();
+                List<Player> players = r_UI.GetPlayers();
                 Game game = new Game(rows, columns, players);
-                ui.ClearScreen();
-                ui.PrintBoard(game.GetBoard(), revealAll: false);
-
+                r_UI.StartGame(game);
                 while (game.GetGameState() == eGameState.Playing)
                 {
                     Player currentPlayer = game.GetCurrentPlayer();
-                    ui.DisplayTurn(currentPlayer);
-
-                    (int row1, int col1) = ui.GetMove(game, currentPlayer);
-                    if (row1 == -1)
+                    r_UI.DisplayTurn(currentPlayer);
+                    if (ProcessMove(game, currentPlayer, out playAgain) == false)
                     {
-                        playAgain = false;
-                        ui.DisplayExitGameMessage();
                         goto Exit;
-                    }
-                    game.MakeMove(row1, col1, 1);
-                    ui.DisplayBoardAndCard(game, currentPlayer, row1, col1, "First");
-                    if (currentPlayer.PlayerType != ePlayerType.Human)
-                    {
-                        System.Threading.Thread.Sleep(2000); // Wait for 2 seconds
-                    }
-
-                    (int row2, int col2) = ui.GetMove(game, currentPlayer);
-                    if (row2 == -1)
-                    {
-                        playAgain = false;
-                        ui.DisplayExitGameMessage();
-                        goto Exit;
-                    }
-                    game.MakeMove(row2, col2, 2);
-                    ui.DisplayBoardAndCard(game, currentPlayer, row2, col2, "Second");
-
-                    game.CheckMove(out IsMatch);
-                    if (IsMatch)
-                    {
-                        ui.DisplayMatch(currentPlayer.Name);
-                    }
-                    else
-                    {
-                        ui.DisplayNoMatch();
-                    }
-                    System.Threading.Thread.Sleep(2000); // Wait for 2 seconds
-                    ui.ClearScreen();
-                    ui.PrintBoard(game.GetBoard(), revealAll: false);
-
-                    if (game.GetGameState() != eGameState.Playing)
-                    {
-                        break;
                     }
                 }
 
-                ui.ClearScreen();
-                ui.PrintBoard(game.GetBoard(), revealAll: true);
-                ui.DisplayGameOver();
-                ui.DisplayFinalScores(players);
-                ui.DisplayWinnerOrTie(game);
+                r_UI.EndGame(game, players);
+                playAgain = r_UI.PromptForNewGame();
+            } while (playAgain == true);
 
-                playAgain = ui.PromptForNewGame();
-
-                if (!playAgain)
-                {
-                    ui.DisplayExitGameMessage();
-                }
-
-            } while (playAgain);
         Exit:
+            r_UI.DisplayExitGameMessage();
             return;
+
+        }
+        private bool ProcessMove(Game i_Game, Player i_CurrentPlayer, out bool io_PlayAgain)
+        {
+            bool isSuccess = true;
+            io_PlayAgain = true;
+            (int row, int col) move1;
+            (int row, int col) move2;
+
+            if (!r_UI.MakeMove(i_Game, i_CurrentPlayer, out move1))
+            {
+                io_PlayAgain = false;
+                isSuccess = false;
+            }
+            else
+            {
+                i_Game.MakeMove(move1.row, move1.col, 1);
+                r_UI.DisplayBoardAndCard(i_Game, i_CurrentPlayer, move1.row, move1.col, "First");
+                if (!r_UI.MakeMove(i_Game, i_CurrentPlayer, out move2))
+                {
+                    io_PlayAgain = false;
+                    isSuccess = false;
+                }
+                else
+                {
+                    i_Game.MakeMove(move2.row, move2.col, 2);
+                    r_UI.DisplayBoardAndCard(i_Game, i_CurrentPlayer, move2.row, move2.col, "Second");
+                    i_Game.CheckMove(out bool isMatch);
+                    r_UI.DisplayMatchResult(i_Game, isMatch, i_CurrentPlayer);
+                    if (i_Game.GetGameState() != eGameState.Playing)
+                    {
+                        isSuccess = false;
+                    }
+                }
+            }
+
+            return isSuccess;
         }
     }
 }

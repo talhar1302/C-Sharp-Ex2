@@ -8,25 +8,21 @@ namespace GameLogic
 {
     public class Player
     {
-        private string m_Name;
+        private readonly string r_Name;
         private int m_Score;
-        private ePlayerType m_PlayerType;
-        public string Name { get => m_Name; set => m_Name = value; }
+        private readonly ePlayerType r_PlayerType;
+        public string Name { get => r_Name; }
         public int Score { get=> m_Score; set => m_Score=value; }
-        public ePlayerType PlayerType { get => m_PlayerType; set => m_PlayerType = value; }
-
+        public ePlayerType PlayerType { get => r_PlayerType; }
         public Player(string i_Name, ePlayerType i_PlayerType)
         {
-            Name = i_Name;
+            r_Name = i_Name;
             Score = 0;
-            PlayerType = i_PlayerType;      
+            r_PlayerType = i_PlayerType;      
         }
-
         public void IncreaseScore()
         {
             Score++;
         }
-
     }
-
 }
