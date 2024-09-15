@@ -109,7 +109,7 @@ namespace GameLogic
             {
                 error = eInputError.OutOfBounds;
             }
-            if (r_Board.IsRevealed(i_Row, i_Col))
+            else if (r_Board.IsRevealed(i_Row, i_Col))
             {
                 error = eInputError.CardAlreadyRevealed;
             }

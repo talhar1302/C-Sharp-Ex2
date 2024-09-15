@@ -66,11 +66,7 @@ namespace GameUI
                     i_Game.MakeMove(move2.row, move2.col, 2);
                     r_UI.DisplayBoardAndCard(i_Game, i_CurrentPlayer, move2.row, move2.col, "Second");
                     i_Game.CheckMove(out bool isMatch);
-                    r_UI.DisplayMatchResult(i_Game, isMatch, i_CurrentPlayer);
-                    if (i_Game.GetGameState() != eGameState.Playing)
-                    {
-                        isSuccess = false;
-                    }
+                    r_UI.DisplayMatchResult(i_Game, isMatch, i_CurrentPlayer);                   
                 }
             }
 
